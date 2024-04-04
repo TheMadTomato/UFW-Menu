@@ -6,8 +6,8 @@
 # CVS:$Header$
 
 set -ueo pipefail
-source "/home/$USER/Linux_Proj/ufw_functions.lb.sh"
-source "/home/$USER/Linux_Proj/ICMP_Block.sh"
+source "/home/$USER/UFW-Menu/ufw_functions.lb.sh"
+source "/home/$USER/UFW-Menu/ICMP_Block.sh"
 
 # Check if UFW is installed on the system 
 # UFW_Exist
