@@ -5,12 +5,23 @@
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
+# Function to install dialog
+install_dialog() {
+    echo "Installing dialog..."
+    python3 install_dialog.py  # Call the Python script to install dialog
+}
+
+# Check if dialog is installed
+if ! command -v dialog &> /dev/null; then
+    install_dialog  # Install dialog if not installed
+fi
+
 set -ueo pipefail
 source "/home/$USER/UFW-Menu/ufw_functions.lb.sh"
 source "/home/$USER/UFW-Menu/ICMP_Block.sh"
 
-# Check if UFW is installed on the system 
-# UFW_Exist
+# Check if UFW is installed on the system
+UFW_Exist
 
 while true; do
     CHOICE=$(dialog --clear --backtitle "UFW Configuration Menu" --title "UFW Menu" --menu "Choose one of the following options:" 15 60 4 \
@@ -45,6 +56,4 @@ while true; do
     esac
     read -p "Press enter to continue"
 done
-
-
 
