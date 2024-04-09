@@ -5,23 +5,6 @@
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
-UFW_Exist (){
-  printf "\033[32mChecking if UFW exists...\033[0m\n"
-  # Scrap the default error message
-  sudo ufw &> /dev/null 
-  # if not exist error: 127  install ufw 
-  if [[ $? -eq 127 ]]; then 
-    # For Debian based systems 
-    sudo apt install ufw -y &> /dev/null 
-    if [[ $? -eq 0 ]]; then 
-      printf "UFW is now installed.\n You may proceed."
-    fi
-  elif [[ $? -eq 1 ]]; then 
-    printf "UFW is already installed. To stop the process of checking if UFW is installed comment the UFW_Exist function in ufw_menu.sh"
-  fi 
-
-}
-
 UFW_Start () {
   sudo ufw enable > ufw_start.txt 
   dialog --title "UFW Start" --textbox ufw_start.txt 22 70

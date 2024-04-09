@@ -5,19 +5,22 @@
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
-set -ueo pipefail
-source "/home/$USER/Linux_Proj/ufw_functions.lb.sh"
-source "/home/$USER/Linux_Proj/ICMP_Block.sh"
+set -uo pipefail
+source "/home/$USER/UFW-Menu/ufw_functions.lb.sh"
+source "/home/$USER/UFW-Menu/ICMP_Block.sh"
+source "/home/$USER/UFW-Menu/UFW_Rules_Management.lb.sh"
+source "/home/$USER/UFW-Menu/Install_Dependencies.sh"
 
-# Check if UFW is installed on the system 
-# UFW_Exist
+# Check if Requirments are installed  
+# Check_If_Installed dialog
+# Check_If_Installed ufw 
 
 while true; do
     CHOICE=$(dialog --clear --backtitle "UFW Configuration Menu" --title "UFW Menu" --menu "Choose one of the following options:" 15 60 4 \
     1 "Start UFW" \
     2 "Check UFW Status" \
     3 "Disable UFW" \
-    4 "List UFW Rules" \
+    4 "Manage UFW Rules" \
     5 "Manage Incoming ICMP Requests" \
     6 "Quit" 2>&1 >/dev/tty)
 
@@ -33,7 +36,7 @@ while true; do
             UFW_Stop
             ;;
         4)
-            sudo ufw status numbered
+            Rules_Managment_Menu
             ;;
         5)
             Manage_ICMP
