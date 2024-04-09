@@ -49,5 +49,3 @@ while true; do
     read -p "Press enter to continue"
 done
 
-
-
