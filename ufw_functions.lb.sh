@@ -5,7 +5,6 @@
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
-
 UFW_Start () {
   sudo ufw enable > ufw_start.txt
   dialog --title "UFW Start" --textbox ufw_start.txt 22 70
