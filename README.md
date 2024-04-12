@@ -9,7 +9,7 @@ sudo apt install ufw
 ```
 - dialog:
 ```bash
-sudo apt install dialogo
+sudo apt install dialog
 ```
 # How To Run
 1. Clone this repository to your system. **Note**: It is mainly targeted toward debian based systems.
