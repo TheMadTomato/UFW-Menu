@@ -27,13 +27,15 @@ None Currently waiting for testing
 - Deleting rules sometimes results in errors 
 > Bug is sloved, user should just input the rule number in reverse from greater to smaller.
 
-# To Improve 
+# To Do 
 - Improve logging feature so it logs only if the command return 0 and log the error if otherwise
 - Add a feature to enable/disable logging(built in UFW feature)
 - Add a feature to enable/disable logging(from our function; comment the lines out)
 - The current Rules managment is a bit limited. We can include the some advanced features such as edit rules to manage the Direction, Policy, Interfaces, Log?(built in one), Protocol, IP, and Port.
 - Sepereate the Basic rule Managment menu from the advanced one. 
-- prompt a message of what will happen by selecting the default setup before initializing it
-- add an about section for info and showing the license 
+- Prompt a message of what will happen by selecting the default setup before initializing it
+- Add only Root (UID 0) Permissons
+- VPN?
+- Add an about section for info and showing the license 
 
 # **FOR ADDITIONAL INQUERIES AND/IDEAS PLEASE OPEN A DISCUSSION THREAD**
