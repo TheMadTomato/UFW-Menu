@@ -13,8 +13,10 @@ Block_ICMP() {
   if [[ $CHOICE == "y" || $CHOICE == "Y" ]]; then 
     printf "Taking a backup file of the original /etc/ufw/before.rules...\n"
     sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${BACKUP_DATE}
+    echo "[$(date)]: /etc/ufw/before.rules backup is created" >> ICMP.log
 
     sudo sed -i '34,37s/ACCEPT/DROP/g' /etc/ufw/before.rules
+    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Blocked" >> ICMP.log
 
     sudo ufw reload
   elif [[ $CHOICE == "n" || $CHOICE == "N" ]]; then 
@@ -33,8 +35,10 @@ Unblock_ICMP() {
   if [[ $CHOICE == "y" || $CHOICE == "Y" ]]; then 
     printf "Taking a backup file of the original /etc/ufw/before.rules...\n"
     sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${BACKUP_DATE}
+    echo "[$(date)]: /etc/ufw/before.rules backup is created" >> ICMP.log
 
     sudo sed -i '34,37s/DROP/ACCEPT/g' /etc/ufw/before.rules
+    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Unblocked" >> ICMP.log
 
     sudo ufw reload
   elif [[ $CHOICE == "n" || $CHOICE == "N" ]]; then 

@@ -10,36 +10,39 @@ source "/home/$USER/UFW-Menu/ufw_functions.lb.sh"
 source "/home/$USER/UFW-Menu/ICMP_Block.sh"
 source "/home/$USER/UFW-Menu/UFW_Rules_Management.lb.sh"
 source "/home/$USER/UFW-Menu/Install_Dependencies.sh"
+source "/home/$USER/UFW-Menu/Log_Managment.lb.sh"
+
+Check_If_LogDir_Exist
 
 # Check if Requirments are installed  
 # Check_If_Installed dialog
 # Check_If_Installed ufw 
 
 while true; do
-    CHOICE=$(dialog --clear --backtitle "UFW Configuration Menu" --title "UFW Menu" --menu "Choose one of the following options:" 15 60 4 \
-    1 "Start UFW" \
+    CHOICE=$(dialog --clear --backtitle "UFW Configuration Menu" --title "UFW Menu" --menu "Choose one of the following options:" 15 60 5 \
+    1 "Disable/Enable UFW" \
     2 "Check UFW Status" \
-    3 "Disable UFW" \
-    4 "Manage UFW Rules" \
-    5 "Manage Incoming ICMP Requests" \
+    3 "Manage UFW Rules" \
+    4 "Manage Incoming ICMP Requests" \
+    5 "Manage Logs" \
     6 "Quit" 2>&1 >/dev/tty)
 
     clear
     case $CHOICE in
         1)
-            UFW_Start
+            UFW_ON_OFF
             ;;
         2)
             UFW_Status_Check
             ;;
         3)
-            UFW_Stop
-            ;;
-        4)
             Rules_Managment_Menu
             ;;
-        5)
+        4)
             Manage_ICMP
+            ;;
+        5)
+            Logs_Managment
             ;;
         6)
             echo "Exiting..."
