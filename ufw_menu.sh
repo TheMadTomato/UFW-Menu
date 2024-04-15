@@ -25,7 +25,7 @@ while true; do
     3 "Manage UFW Rules" \
     4 "Manage Incoming ICMP Requests" \
     5 "Manage Logs" \
-    6 "Quit" 2>&1 >/dev/tty)
+    6 "Quit" --stdout)
 
     clear
     case $CHOICE in

@@ -15,7 +15,11 @@ UFW_Allow_Service() {
       printf "Error $LINENO:$0: Invalid Input."
       return 192
     fi
-    echo "[$(date)]: Allow Service:$SERVICE" >> /tmp/ufw-menu-logs/allowed_rules.log 
+    if [[ $? -eq 0 ]]; then
+      echo "[$(date)]: Allow Service:$SERVICE" >> /tmp/ufw-menu-logs/allowed_rules.log 
+    else
+      echo "[$(date)]: Allow Service:$SERVICE:FAILED" >> /tmp/ufw-menu-logs/allowed_rules.log 
+    fi
     sudo ufw allow $SERVICE > allowed.txt 
     dialog --title "Allow Service" --textbox allowed.txt 22 70
     rm allowed.txt
@@ -31,7 +35,11 @@ UFW_Block_Service() {
       printf "Error $LINENO:$0: Invalid Input."
       return 192
     fi 
-    echo "[$(date)]: Deny Service:$SERVICE" >> /tmp/ufw-menu-logs/denied_rules.log 
+    if [[ $? -eq 0 ]]; then
+      echo "[$(date)]: Deny Service:$SERVICE" >> /tmp/ufw-menu-logs/denied_rules.log 
+    else 
+      echo "[$(date)]: Deny Service:$SERVICE:FAILED" >> /tmp/ufw-menu-logs/denied_rules.log 
+    fi
     sudo ufw deny $SERVICE > blocked.txt 
     dialog --title "Deny Service" --textbox blocked.txt 22 70 
     rm blocked.txt
@@ -54,10 +62,6 @@ UFW_Delete_Rule() {
     if [ "$RULE_NUMBERS" == "back" ]; then
       UFW_View_Services
       continue
-    fi
-
-    if [ ! -d "/tmp/ufw-menu-logs" ]; then
-      mkdir -p /tmp/ufw-menu-logs
     fi
 
     for RULE_NUMBER in $RULE_NUMBERS; do
@@ -136,7 +140,7 @@ Rules_Managment_Menu() {
   "4" "Delete Rule" \
   "5" "Reset Rules" \
   "6" "Load Default Rules" \
-  "7" "Return to Main Menu" 2>&1 >/dev/tty )
+  "7" "Return to Main Menu" --stdout )
 
   case $CHOICE in
     1)
