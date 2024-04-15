@@ -29,7 +29,6 @@ None Currently waiting for testing
 
 # To Do 
 - Add a feature to enable/disable logging(built in UFW feature)
-- Add a feature to enable/disable logging(from our function; comment the lines out)
 - The current Rules managment is a bit limited. We can include the some advanced features such as edit rules to manage the Direction, Policy, Interfaces, Log?(built in one), Protocol, IP, and Port.
 - Sepereate the Basic rule Managment menu from the advanced one. 
 - Prompt a message of what will happen by selecting the default setup before initializing it
