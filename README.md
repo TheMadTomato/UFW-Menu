@@ -28,7 +28,6 @@ None Currently waiting for testing
 > Bug is sloved, user should just input the rule number in reverse from greater to smaller.
 
 # To Do 
-- Improve logging feature so it logs only if the command return 0 and log the error if otherwise
 - Add a feature to enable/disable logging(built in UFW feature)
 - Add a feature to enable/disable logging(from our function; comment the lines out)
 - The current Rules managment is a bit limited. We can include the some advanced features such as edit rules to manage the Direction, Policy, Interfaces, Log?(built in one), Protocol, IP, and Port.
