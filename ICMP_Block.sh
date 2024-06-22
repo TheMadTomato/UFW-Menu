@@ -1,51 +1,49 @@
 #!/bin/bash
 #
-# ICMP Block: A function to make UFW disable ICMP request for elevating security by obscurity 
+# ICMP Block: A function to make UFW disable ICMP requests for elevating security by obscurity 
 #
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
 Block_ICMP() {
-  read -p "Do you want to disable ICMP therefor blocking ping requests to this server? (y|n): " CHOICE
+  CHOICE=$(dialog --stdout --title "Block ICMP" --yesno "Do you want to disable ICMP therefore blocking ping requests to this server?" 7 60)
 
-  declare BACKUP_DATE=`date '+%Y%m%d_%H%M%S'`
+  local backup_date
+  backup_date=$(date '+%Y%m%d_%H%M%S')
 
-  if [[ $CHOICE == "y" || $CHOICE == "Y" ]]; then 
-    printf "Taking a backup file of the original /etc/ufw/before.rules...\n"
-    sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${BACKUP_DATE}
-    echo "[$(date)]: /etc/ufw/before.rules backup is created" >> ICMP.log
+  if [ $? -eq 0 ]; then 
+    dialog --infobox "Taking a backup of the original /etc/ufw/before.rules..." 5 50
+    sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${backup_date}
+    echo "[$(date)]: /etc/ufw/before.rules backup is created" | sudo tee -a "$LOG_DIR/ICMP.log"
 
     sudo sed -i '34,37s/ACCEPT/DROP/g' /etc/ufw/before.rules
-    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Blocked" >> ICMP.log
+    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Blocked" | sudo tee -a "$LOG_DIR/ICMP.log"
 
     sudo ufw reload
-  elif [[ $CHOICE == "n" || $CHOICE == "N" ]]; then 
-    printf "Canceling..."
+    dialog --msgbox "ICMP requests have been blocked. /etc/ufw/before.rules has been updated." 7 60
   else 
-    printf "Error $LINENO:$0: Invalid Input."
-    return 192
+    dialog --msgbox "Canceling..." 5 30
   fi 
 }
 
 Unblock_ICMP() {
-  read -p "Do you want to enable ICMP therefor blocking ping requests to this server? (y|n): " CHOICE
+  CHOICE=$(dialog --stdout --title "Unblock ICMP" --yesno "Do you want to enable ICMP therefore allowing ping requests to this server?" 7 60)
 
-  declare BACKUP_DATE=`date '+%Y%m%d_%H%M%S'`
+  local backup_date
+  backup_date=$(date '+%Y%m%d_%H%M%S')
 
-  if [[ $CHOICE == "y" || $CHOICE == "Y" ]]; then 
-    printf "Taking a backup file of the original /etc/ufw/before.rules...\n"
-    sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${BACKUP_DATE}
-    echo "[$(date)]: /etc/ufw/before.rules backup is created" >> ICMP.log
+  if [ $? -eq 0 ]; then 
+    dialog --infobox "Taking a backup of the original /etc/ufw/before.rules..." 5 50
+    sudo cp /etc/ufw/before.rules /etc/ufw/before.rules_${backup_date}
+    echo "[$(date)]: /etc/ufw/before.rules backup is created" | sudo tee -a "$LOG_DIR/ICMP.log"
 
     sudo sed -i '34,37s/DROP/ACCEPT/g' /etc/ufw/before.rules
-    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Unblocked" >> ICMP.log
+    echo "[$(date)]: /etc/ufw/before.rules is edited; Ping is Unblocked" | sudo tee -a "$LOG_DIR/ICMP.log"
 
     sudo ufw reload
-  elif [[ $CHOICE == "n" || $CHOICE == "N" ]]; then 
-    printf "Canceling..."
+    dialog --msgbox "ICMP requests have been enabled. /etc/ufw/before.rules has been updated." 7 60
   else 
-    printf "Error $LINENO:$0: Invalid Input."
-    return 192 
+    dialog --msgbox "Canceling..." 5 30
   fi 
 }
 
@@ -63,7 +61,6 @@ Manage_ICMP() {
       Unblock_ICMP
       ;;
     3) 
-      # bash /home/$USER/Linux_Proj/ufw_menu.sh
       return
       ;;
   esac

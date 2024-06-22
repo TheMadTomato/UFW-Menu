@@ -1,10 +1,9 @@
 #!/bin/bash
 #
-# UFW Rules Managment: A library of bash functions to manage UFW rules and policies
+# UFW Rules Management: A library of bash functions to manage UFW rules and policies
 #
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
-
 
 UFW_Allow_Service() {
   SERVICE_PATTERN='^((([0-9a-z]+)-?([0-9a-z]+)?)|([0-9]{1,5}))'
@@ -12,16 +11,18 @@ UFW_Allow_Service() {
 
   for SERVICE in $SERVICES; do
     if ! [[ $SERVICE =~ $SERVICE_PATTERN ]]; then
-      printf "Error $LINENO:$0: Invalid Input."
+      dialog --msgbox "Error: Invalid input for service name or port number." 10 40
+      echo "[$(date)]: Invalid input for service name or port number: $SERVICE" | sudo tee -a "$LOG_DIR/allowed_rules.log"
       return 192
     fi
-    if [[ $? -eq 0 ]]; then
-      echo "[$(date)]: Allow Service:$SERVICE" >> /tmp/ufw-menu-logs/allowed_rules.log 
+
+    if sudo ufw allow $SERVICE > allowed.txt; then
+      echo "[$(date)]: Allowed service: $SERVICE" | sudo tee -a "$LOG_DIR/allowed_rules.log"
+      dialog --title "Allow Service" --textbox allowed.txt 22 70
     else
-      echo "[$(date)]: Allow Service:$SERVICE:FAILED" >> /tmp/ufw-menu-logs/allowed_rules.log 
+      echo "[$(date)]: Failed to allow service: $SERVICE" | sudo tee -a "$LOG_DIR/allowed_rules.log"
+      dialog --msgbox "Failed to allow service: $SERVICE" 10 40
     fi
-    sudo ufw allow $SERVICE > allowed.txt 
-    dialog --title "Allow Service" --textbox allowed.txt 22 70
     rm allowed.txt
   done
 }
@@ -32,25 +33,27 @@ UFW_Block_Service() {
 
   for SERVICE in $SERVICES; do
     if ! [[ $SERVICE =~ $SERVICE_PATTERN ]]; then
-      printf "Error $LINENO:$0: Invalid Input."
+      dialog --msgbox "Error: Invalid input for service name or port number." 10 40
+      echo "[$(date)]: Invalid input for service name or port number: $SERVICE" | sudo tee -a "$LOG_DIR/denied_rules.log"
       return 192
-    fi 
-    if [[ $? -eq 0 ]]; then
-      echo "[$(date)]: Deny Service:$SERVICE" >> /tmp/ufw-menu-logs/denied_rules.log 
-    else 
-      echo "[$(date)]: Deny Service:$SERVICE:FAILED" >> /tmp/ufw-menu-logs/denied_rules.log 
     fi
-    sudo ufw deny $SERVICE > blocked.txt 
-    dialog --title "Deny Service" --textbox blocked.txt 22 70 
+
+    if sudo ufw deny $SERVICE > blocked.txt; then
+      echo "[$(date)]: Denied service: $SERVICE" | sudo tee -a "$LOG_DIR/denied_rules.log"
+      dialog --title "Deny Service" --textbox blocked.txt 22 70
+    else
+      echo "[$(date)]: Failed to deny service: $SERVICE" | sudo tee -a "$LOG_DIR/denied_rules.log"
+      dialog --msgbox "Failed to deny service: $SERVICE" 10 40
+    fi
     rm blocked.txt
   done
 }
 
 UFW_View_Services() {
-  echo "[$(date)]: Service Viewed" >> /tmp/ufw-menu-logs/viewed_rules.log
-  sudo ufw status numbered > services.txt 
+  echo "[$(date)]: Services viewed" | sudo tee -a "$LOG_DIR/viewed_rules.log"
+  sudo ufw status numbered > services.txt
   dialog --title "UFW Services" --textbox services.txt 22 70
-  rm services.txt 
+  rm services.txt
 }
 
 UFW_Delete_Rule() {
@@ -66,73 +69,75 @@ UFW_Delete_Rule() {
 
     for RULE_NUMBER in $RULE_NUMBERS; do
       if ! [[ $RULE_NUMBER =~ ^[0-9]+$ ]]; then
-        printf "Error $LINENO:$0: Invalid Input."
+        dialog --msgbox "Error: Invalid rule number." 10 40
+        echo "[$(date)]: Invalid rule number: $RULE_NUMBER" | sudo tee -a "$LOG_DIR/delete_rules.log"
         return 192
       fi
-      echo "[$(date)] >>>" >> /tmp/ufw-menu-logs/delete_rules.log
-      sudo ufw delete $RULE_NUMBER <<< "y" &>> /tmp/ufw-menu-logs/delete_rules_log
+      sudo ufw delete $RULE_NUMBER <<< "y" &>> "$LOG_DIR/delete_rules.log"
     done
 
     if [[ $? -eq 0 ]]; then
       dialog --title "Delete Rule" --msgbox "Rules deleted successfully." 10 40
+      echo "[$(date)]: Deleted rules: $RULE_NUMBERS" | sudo tee -a "$LOG_DIR/delete_rules.log"
     else
-      dialog --title "Delete Rule" --msgbox "Error encountered. Please check the delete_rules_log file in the /tmp/ufw-menu-logs directory for more details." 10 60
+      dialog --title "Delete Rule" --msgbox "Error encountered. Please check the delete_rules.log file in the $LOG_DIR directory for more details." 10 60
       return
     fi
 
-  break 
+    break 
   done
 }
 
 Default_Rules_Setup() {
-  # Display starting message
   dialog --title "Default Rules Setup" --msgbox "Starting default rules setup..." 10 40
 
-  # Deny incoming traffic
-  echo "$(date) - Applying default rules: Deny incoming traffic" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw default deny incoming > /dev/null
+  {
+    echo "$(date) - Applying default rules: Deny incoming traffic"
+    sudo ufw default deny incoming > /dev/null
 
-  # Allow outgoing traffic
-  echo "$(date) - Applying default rules: Allow outgoing traffic" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw default allow outgoing > /dev/null
+    echo "$(date) - Applying default rules: Allow outgoing traffic"
+    sudo ufw default allow outgoing > /dev/null
 
-  # Allow typical ports
-  echo "$(date) - Applying default rules: Allow SSH" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw allow ssh > /dev/null
-  echo "$(date) - Applying default rules: Allow HTTP" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw allow http > /dev/null
-  echo "$(date) - Applying default rules: Allow port 8080" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw allow 8080 > /dev/null
-  echo "$(date) - Applying default rules: Allow HTTPS" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw allow https > /dev/null
+    echo "$(date) - Applying default rules: Allow SSH"
+    sudo ufw allow ssh > /dev/null
 
-  # Deny vulnerable ports
-  echo "$(date) - Applying default rules: Deny port 23" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw deny 23 > /dev/null
-  echo "$(date) - Applying default rules: Deny port 445" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw deny 445 > /dev/null
-  echo "$(date) - Applying default rules: Deny port 1433" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw deny 1433 > /dev/null
-  echo "$(date) - Applying default rules: Deny port 3306" >> /tmp/ufw-menu-logs/default_rule.log
-  sudo ufw deny 3306 > /dev/null
+    echo "$(date) - Applying default rules: Allow HTTP"
+    sudo ufw allow http > /dev/null
 
-  # Display finishing message
+    echo "$(date) - Applying default rules: Allow port 8080"
+    sudo ufw allow 8080 > /dev/null
+
+    echo "$(date) - Applying default rules: Allow HTTPS"
+    sudo ufw allow https > /dev/null
+
+    echo "$(date) - Applying default rules: Deny port 23"
+    sudo ufw deny 23 > /dev/null
+
+    echo "$(date) - Applying default rules: Deny port 445"
+    sudo ufw deny 445 > /dev/null
+
+    echo "$(date) - Applying default rules: Deny port 1433"
+    sudo ufw deny 1433 > /dev/null
+
+    echo "$(date) - Applying default rules: Deny port 3306"
+    sudo ufw deny 3306 > /dev/null
+
+    echo "$(date) - Default rules applied successfully"
+  } | sudo tee -a "$LOG_DIR/default_rule.log"
+
   dialog --title "Default Rules Setup" --msgbox "Default rules setup completed." 10 40
-
-  echo "$(date) - Default rules applied successfully" >> /tmp/ufw-menu-logs/default_rule.log
 }
 
 UFW_Reset_Rules() {
   dialog --title "Reset Rules" --yesno "Are you sure you want to reset all UFW rules?" 10 40
-  RESPONSE=$?
-  if [ $RESPONSE -eq 0 ]; then
-    echo "[$(date)] >>>" >> /tmp/ufw-menu-logs/reset.log
-    sudo ufw reset <<< "y" &>> /tmp/ufw-menu-logs/reset.log
+  if [ $? -eq 0 ]; then
+    echo "[$(date)] >>> Resetting UFW rules" | sudo tee -a "$LOG_DIR/reset.log"
+    sudo ufw reset <<< "y" &>> "$LOG_DIR/reset.log"
     dialog --title "Reset Rules" --msgbox "UFW rules have been reset." 10 40
   fi
 }
 
-Rules_Managment_Menu() {
+Rules_Management_Menu() {
   CHOICE=$(dialog --clear --backtitle "Manage Rules" --title "Rules Management Menu" --menu "Choose one of the following options:" 15 60 6 \
   "1" "Allow Service" \
   "2" "Block Service" \

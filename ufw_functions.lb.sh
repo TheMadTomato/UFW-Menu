@@ -6,28 +6,50 @@
 # CVS:$Header$
 
 UFW_Start () {
-  sudo ufw enable > ufw_start.txt
-  echo "[$(date)]: UFW enabled" >> /tmp/ufw-menu-logs/ufw_status.log
-  dialog --title "UFW Start" --textbox ufw_start.txt 22 70
-  rm ufw_start.txt
+  local temp_file
+  temp_file=$(mktemp)
+
+  if sudo ufw enable > "$temp_file" 2>&1; then
+    local status="success"
+    local message="UFW enabled"
+  else
+    local status="failure"
+    local message="Failed to enable UFW"
+  fi
+
+  echo "[$(date)]: $message" | sudo tee -a "$LOG_DIR/ufw_status.log"
+  dialog --title "UFW Start" --textbox "$temp_file" 22 70
+  rm "$temp_file"
 }
 
 UFW_Status_Check () {
-  sudo systemctl status ufw > ufw_status.txt
-  dialog --title "UFW Status" --textbox ufw_status.txt 22 70
-  rm ufw_status.txt
+  local temp_file
+  temp_file=$(mktemp)
+
+  sudo systemctl status ufw > "$temp_file" 2>&1
+  dialog --title "UFW Status" --textbox "$temp_file" 22 70
+  rm "$temp_file"
 }
 
 UFW_Stop () {
-  sudo ufw disable > ufw_stop.txt
-  echo "[$(date)]: UFW disabled" >> /tmp/ufw-menu-logs/ufw_status.log
-  dialog --title "UFW Stop" --textbox ufw_stop.txt 22 70
-  rm ufw_stop.txt
+  local temp_file
+  temp_file=$(mktemp)
+
+  if sudo ufw disable > "$temp_file" 2>&1; then
+    local status="success"
+    local message="UFW disabled"
+  else
+    local status="failure"
+    local message="Failed to disable UFW"
+  fi
+
+  echo "[$(date)]: $message" | sudo tee -a "$LOG_DIR/ufw_status.log"
+  dialog --title "UFW Stop" --textbox "$temp_file" 22 70
+  rm "$temp_file"
 }
 
-
 UFW_ON_OFF () {
-  CHOICE=$(dialog --clear --backtitle "UFW Disable/Enable Menu" --title "Disable/Enable Menu" --menu "Choos One of the following options:" 15 60 4 \
+  CHOICE=$(dialog --clear --backtitle "UFW Disable/Enable Menu" --title "Disable/Enable Menu" --menu "Choose one of the following options:" 15 60 4 \
   1 "Enable UFW" \
   2 "Disable UFW" \
   3 "Return to Main Menu" --stdout)

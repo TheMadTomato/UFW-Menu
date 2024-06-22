@@ -1,37 +1,39 @@
 #!/bin/bash
 #
-# UFW_Menu: A CLI configuration menu for ufw and iptables to automate firewall managment
+# UFW_Menu: A CLI configuration menu for ufw and iptables to automate firewall management
 #
 # Anthony Debbas, Charbel Rahme, Paul A. Estephan, Peter G. Chalhoub
 # CVS:$Header$
 
 Check_If_LogDir_Exist() {
- if [ ! -d "/tmp/ufw-menu-logs" ]; then
-     mkdir -p /tmp/ufw-menu-logs
- fi
+  if [ ! -d "$LOG_DIR" ]; then
+    sudo mkdir -p "$LOG_DIR"
+    sudo chown root:root "$LOG_DIR"
+    sudo chmod 755 "$LOG_DIR"
+  fi
 }
 
 Logs_Info() {
-  LOGS_DISK_SPACE=$(ls -l /tmp/ufw-menu-logs/ | awk '{sum+=$5} END {print sum}')
-  LOGS_FILES_COUNT=$(ls -1 /tmp/ufw-menu-logs/ | wc -l)
-  LOGS_LAST_EDIT=$(ls -l /tmp/ufw-menu-logs/ | awk 'BEGIN{printf "%-20s %-20s\n", "FILENAME", "LAST_TIME_MODIFIED"} {printf "%-20s %-20s\n", $9, $8}')
+  LOGS_DISK_SPACE=$(sudo du -sh "$LOG_DIR" | awk '{print $1}')
+  LOGS_FILES_COUNT=$(sudo ls -1 "$LOG_DIR" | wc -l)
+  LOGS_LAST_EDIT=$(sudo ls -lt "$LOG_DIR" | awk 'BEGIN {printf "%-20s %-20s\n", "FILENAME", "LAST_TIME_MODIFIED"} {printf "%-20s %-20s\n", $9, $6 " " $7 " " $8}')
 
-  dialog --title "Logs Information" --msgbox "Logs Total Size: $LOGS_DISK_SPACE Bytes\nFiles Count: $LOGS_FILES_COUNT\nLast Edit:\n$LOGS_LAST_EDIT" 10 40
+  dialog --title "Logs Information" --msgbox "Logs Total Size: $LOGS_DISK_SPACE\nFiles Count: $LOGS_FILES_COUNT\nLast Edit:\n$LOGS_LAST_EDIT" 20 60
 }
 
 Backup_Logs() {
   INPUT_PATH=$(dialog --title "Enter Input Path" --inputbox "Enter the path where you want to save the logs backup:" 10 40 --stdout)
-  tar -czvf "$INPUT_PATH/ufw-menu-logs.tar.gz" -C /tmp ufw-menu-logs
+  sudo tar -czvf "$INPUT_PATH/ufw-menu-logs.tar.gz" -C /var/log ufw-menu-logs
   dialog --title "Backup Complete" --msgbox "Logs backup created successfully." 10 40
 }
 
 Delete_Logs() {
-  for FILE in /tmp/ufw-menu-logs/*; do
+  for FILE in "$LOG_DIR"/*; do
     if [ -f "$FILE" ]; then
       dialog --title "Delete Log File" --yesno "Do you want to delete the file: $FILE?" 10 40
       RESP=$?
       if [ $RESP -eq 0 ]; then
-        rm "$FILE"
+        sudo rm "$FILE"
         dialog --title "File Deleted" --msgbox "File $FILE deleted successfully." 10 40
       else
         dialog --title "File Kept" --msgbox "File $FILE kept." 10 40
@@ -41,7 +43,7 @@ Delete_Logs() {
 }
 
 List_Logs(){
-  LOG_FILES=$(ls -1 /tmp/ufw-menu-logs/)
+  LOG_FILES=$(sudo ls -1 "$LOG_DIR")
   dialog --title "Log Files" --msgbox "$LOG_FILES" 10 40
 }
 
@@ -49,14 +51,16 @@ Read_Logs() {
   List_Logs
 
   FILE_PATH=$(dialog --title "Enter File Name" --inputbox "Enter the name of the log file:" 10 40 --stdout)
-  if [ -f "/tmp/ufw-menu-logs/$FILE_PATH" ]; then
-    dialog --title "Log File: $FILE_PATH" --textbox "/tmp/ufw-menu-logs/$FILE_PATH" 20 60
+  if [ -f "$LOG_DIR/$FILE_PATH" ]; then
+    dialog --title "Log File: $FILE_PATH" --textbox "$LOG_DIR/$FILE_PATH" 40 60
   else
     dialog --title "File Not Found" --msgbox "The specified log file does not exist." 10 40
   fi
 }
 
-Logs_Managment() {
+Logs_Management() {
+  Check_If_LogDir_Exist
+
   while true; do
     choice=$(dialog --title "UFW Menu - Log Management" --menu "Choose an option:" 15 40 6 \
       1 "Logs Information" \
@@ -75,3 +79,5 @@ Logs_Managment() {
     esac
   done
 }
+
+

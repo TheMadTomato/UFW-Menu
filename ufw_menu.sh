@@ -6,17 +6,24 @@
 # CVS:$Header$
 
 set -uo pipefail
-source "/home/$USER/UFW-Menu/ufw_functions.lb.sh"
-source "/home/$USER/UFW-Menu/ICMP_Block.sh"
-source "/home/$USER/UFW-Menu/UFW_Rules_Management.lb.sh"
-source "/home/$USER/UFW-Menu/Install_Dependencies.sh"
-source "/home/$USER/UFW-Menu/Log_Managment.lb.sh"
+source "./ufw_functions.lb.sh"
+source "./ICMP_Block.sh"
+source "./UFW_Rules_Management.lb.sh"
+source "./Install_Dependencies.sh"
+source "./Log_Managment.lb.sh"
 
+# Check if running as root
+if [ "$UID" -ne 0 ]; then
+    echo "This script must be run as root." 
+    exit 1
+fi
+
+
+LOG_DIR="/var/log/ufw-menu-logs"
 Check_If_LogDir_Exist
 
 # Check if Requirments are installed  
-# Check_If_Installed dialog
-# Check_If_Installed ufw 
+Dependency_Check
 
 while true; do
     CHOICE=$(dialog --clear --backtitle "UFW Configuration Menu" --title "UFW Menu" --menu "Choose one of the following options:" 15 60 5 \
@@ -36,13 +43,13 @@ while true; do
             UFW_Status_Check
             ;;
         3)
-            Rules_Managment_Menu
+            Rules_Management_Menu
             ;;
         4)
             Manage_ICMP
             ;;
         5)
-            Logs_Managment
+            Logs_Management
             ;;
         6)
             echo "Exiting..."
